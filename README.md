@@ -16,7 +16,7 @@
 This educational security demonstration showcases how brute force attacks work against vulnerable login systems and provides comprehensive guidance on protecting social media accounts and personal data. The project features a professional UI/UX design with real-time attack simulation and detailed educational content.
 
 ### 🌟 **Live Demo**
-🔗 **[View Live Demo on Netlify](https://your-demo-link.netlify.app)**
+🔗 **[View Live Demo on GitHub](https://m1yu3xpl0rer22.github.io/Brute-Force-Login-Script/)**
 
 ## ✨ Key Features
 
@@ -70,8 +70,6 @@ open index.html
 
 
 
-#### Method 2: Quick Netlify Deploy
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/yourusername/brute-force-security-demo)
 
 ## 🎮 How to Use
 
