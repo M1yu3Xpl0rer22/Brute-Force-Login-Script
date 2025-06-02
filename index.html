@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brute Force Security Demo - Educational</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .login-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e6ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .btn-login {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-attack {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .btn-attack:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .attack-panel h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .warning {
+            background: linear-gradient(45deg, #ffeaa7, #fab1a0);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #e17055;
+        }
+
+        .warning h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .status {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #74b9ff;
+        }
+
+        .log {
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 12px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+        }
+
+        .log-entry.success {
+            color: #2ecc71;
+        }
+
+        .log-entry.fail {
+            color: #e74c3c;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .vulnerability-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .vulnerability-info h4 {
+            color: #856404;
+            margin-bottom: 0.5rem;
+        }
+
+        .vulnerability-info ul {
+            color: #856404;
+            padding-left: 1.5rem;
+        }
+
+        .education-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .education-content {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .edu-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .edu-header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .edu-header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .section.warning {
+            background: linear-gradient(135deg, #fff5f5, #fed7d7);
+            border-left-color: #e53e3e;
+        }
+
+        .section.tip {
+            background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+            border-left-color: #38a169;
+        }
+
+        .section.info {
+            background: linear-gradient(135deg, #ebf8ff, #bee3f8);
+            border-left-color: #3182ce;
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section h3 {
+            color: #34495e;
+            margin: 1.5rem 0 0.8rem 0;
+        }
+
+        .password-strength {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .strength-card {
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .weak {
+            background: linear-gradient(135deg, #fed7d7, #feb2b2);
+            color: #c53030;
+        }
+
+        .medium {
+            background: linear-gradient(135deg, #feebc8, #fbd38d);
+            color: #d69e2e;
+        }
+
+        .strong {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+            color: #2f855a;
+        }
+
+        .social-platforms {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .platform-card {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .platform-card h4 {
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checklist {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+        }
+
+        .checklist ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 0.5rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .checklist li:before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+        }
+
+        .myth-fact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .myth {
+            background: linear-gradient(135deg, #fed7d7, #feb2b2);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .fact {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .myth h4, .fact h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 3px solid #667eea;
+            margin: 1rem 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .timeline-item:before {
+            content: "";
+            position: absolute;
+            left: -2.25rem;
+            top: 1rem;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .education-content {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            
+            .myth-fact {
+                grid-template-columns: 1fr;
+            }
+            
+            .password-strength {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <marquee style="color: white; padding: 10px; font-family: 'Comic Sans MS', cursive, sans-serif; font-weight: bold; position: fixed; top: 0; left: 0; width: 100%; z-index: 999; backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+        🚀 Created by M1yu3Xpl0rer22 - Protect Your Digital Life 🛡️
+    </marquee>
+    
+    <div class="container" style="margin-top: 50px;">
+        <!-- Login Panel -->
+        <div class="panel login-panel">
+            <div class="logo">🔒</div>
+            <h1>Dummy Login System</h1>
+            <p class="subtitle">Educational Security Demo</p>
+            
+            <form class="form-group">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" value="admin" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password">
+                </div>
+                
+                <button type="button" class="btn btn-login" onclick="normalLogin()">
+                    Login
+                </button>
+                
+                <button type="button" class="btn btn-login" id="educationBtn" onclick="openEducationPage()" style="display: none; background: linear-gradient(45deg, #2ecc71, #27ae60);">
+                    📚 Learn Security Best Practices
+                </button>
+            </form>
+            
+            <div id="loginStatus" style="margin-top: 1rem; text-align: center;"></div>
+            
+            <div class="vulnerability-info">
+                <h4>🎯 Target Credentials</h4>
+                <ul>
+                    <li>Username: admin</li>
+                    <li>Password: password123</li>
+                    <li>No rate limiting implemented</li>
+                    <li>No account lockout mechanism</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Attack Panel -->
+        <div class="panel">
+            <h2>🔍 Brute Force Attack Simulator</h2>
+            
+            <div class="warning">
+                <h3>⚠️ Educational Purpose Only</h3>
+                <p>This demo shows how brute force attacks work against vulnerable systems. Never use this knowledge maliciously.</p>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="attempts">0</span>
+                    <span>Attempts</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="success">0</span>
+                    <span>Success</span>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            
+            <div class="status" id="attackStatus">
+                Ready to start attack simulation
+            </div>
+            
+            <button class="btn btn-attack" id="startAttack" onclick="startBruteForce()">
+                🚀 Start Brute Force Attack
+            </button>
+            
+            <button class="btn btn-attack" id="stopAttack" onclick="stopBruteForce()" style="display: none; background: #e74c3c;">
+                ⏹️ Stop Attack
+            </button>
+            
+            <div class="log" id="attackLog">
+                <div class="log-entry">System ready for educational brute force demonstration...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Education Page Modal -->
+    <div class="education-page" id="educationPage">
+        <div class="education-content">
+            <button class="close-btn" onclick="closeEducationPage()">×</button>
+            
+            <div class="edu-header">
+                <h1>🔐 Password Security & Social Media Protection</h1>
+                <p>Essential knowledge to protect your digital life</p>
+            </div>
+
+            <div class="section warning">
+                <h2>⚠️ Why This Matters</h2>
+                <p>You just witnessed how quickly weak passwords can be cracked. In 2024, <strong>cybercriminals compromise 50,000+ accounts daily</strong> using brute force attacks. Your social media accounts contain personal information, photos, messages, and connections that could be used for identity theft, harassment, or financial fraud.</p>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>🎯 Account Takeover</h4>
+                        <p>Attackers gain access to your profile and personal information</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>🕵️ Identity Theft</h4>
+                        <p>Personal details used to impersonate you or commit fraud</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>💸 Financial Loss</h4>
+                        <p>Scams targeting your friends/family, or direct financial theft</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>🔗 Chain Attacks</h4>
+                        <p>Using your account to attack others in your network</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section info">
+                <h2>🔑 Password Strength Reality Check</h2>
+                <p>Here's how long it takes modern computers to crack different types of passwords:</p>
+                
+                <div class="password-strength">
+                    <div class="strength-card weak">
+                        <h3>❌ Weak</h3>
+                        <p><strong>"password123"</strong></p>
+                        <p>Cracked in: <strong>0.0001 seconds</strong></p>
+                        <p>8 characters, common word</p>
+                    </div>
+                    <div class="strength-card medium">
+                        <h3>⚠️ Medium</h3>
+                        <p><strong>"MyP@ssw0rd2024"</strong></p>
+                        <p>Cracked in: <strong>2 hours</strong></p>
+                        <p>14 characters with substitutions</p>
+                    </div>
+                    <div class="strength-card strong">
+                        <h3>✅ Strong</h3>
+                        <p><strong>"Coffee!Sun#Dance$Moon9"</strong></p>
+                        <p>Cracked in: <strong>41 trillion years</strong></p>
+                        <p>23 characters, random words + symbols</p>
+                    </div>
+                </div>
+
+                <div class="myth-fact">
+                    <div class="myth">
+                        <h4>❌ MYTH</h4>
+                        <p>"Complex symbols make passwords uncrackable"</p>
+                    </div>
+                    <div class="fact">
+                        <h4>✅ FACT</h4>
+                        <p>"Length + unpredictability = strength. 'correcthorsebatterystaple' beats 'P@$w0rd!'"</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section tip">
+                <h2>🛡️ Social Media Protection Strategy</h2>
+                
+                <div class="social-platforms">
+                    <div class="platform-card">
+                        <h4>📘 Facebook/Meta</h4>
+                        <ul>
+                            <li>Enable 2FA with authenticator app</li>
+                            <li>Review login alerts</li>
+                            <li>Limit app permissions</li>
+                            <li>Use "Login Approvals"</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <h4>📸 Instagram</h4>
+                        <ul>
+                            <li>Two-factor authentication</li>
+                            <li>Review active sessions</li>
+                            <li>Private account settings</li>
+                            <li>Limit data sharing</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <h4>🐦 Twitter/X</h4>
+                        <ul>
+                            <li>Strong unique password</li>
+                            <li>2FA via SMS or app</li>
+                            <li>Review connected apps</li>
+                            <li>Monitor login activity</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <h4>💼 LinkedIn</h4>
+                        <ul>
+                            <li>Professional password manager</li>
+                            <li>Two-step verification</li>
+                            <li>Regular security checkups</li>
+                            <li>Control data visibility</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <h4>🎵 TikTok</h4>
+                        <ul>
+                            <li>Unique strong password</li>
+                            <li>SMS or email 2FA</li>
+                            <li>Privacy settings review</li>
+                            <li>Limit personal info sharing</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <h4>📺 YouTube</h4>
+                        <ul>
+                            <li>Google 2FA protection</li>
+                            <li>Channel security settings</li>
+                            <li>Review account access</li>
+                            <li>Monitor unusual activity</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section info">
+                <h2>🔐 The Ultimate Protection Checklist</h2>
+                
+                <div class="checklist">
+                    <h3>Essential Security Steps:</h3>
+                    <ul>
+                        <li><strong>Use a Password Manager</strong> - Tools like Bitwarden, 1Password, or LastPass generate and store unique passwords</li>
+                        <li><strong>Enable 2FA Everywhere</strong> - Use authenticator apps (Google Authenticator, Authy) instead of SMS when possible</li>
+                        <li><strong>Create Unique Passwords</strong> - Never reuse passwords across platforms</li>
+                        <li><strong>Regular Security Audits</strong> - Review connected apps, active sessions, and permissions monthly</li>
+                        <li><strong>Monitor Dark Web</strong> - Use services like HaveIBeenPwned to check if your data was breached</li>
+                        <li><strong>Update Recovery Information</strong> - Keep backup emails and phone numbers current</li>
+                        <li><strong>Be Suspicious of Links</strong> - Phishing attacks often target social media users</li>
+                        <li><strong>Privacy Settings Review</strong> - Limit who can see your posts, friends list, and personal information</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section tip">
+                <h2>🚨 Advanced Protection Techniques</h2>
+                
+                <h3>🎭 Create Strong Passwords Using the "Passphrase Method":</h3>
+                <p><strong>Step 1:</strong> Pick 4-5 random words: <em>Coffee, Mountain, Purple, Dancing, 47</em></p>
+                <p><strong>Step 2:</strong> Add symbols between: <em>Coffee#Mountain$Purple!Dancing@47</em></p>
+                <p><strong>Result:</strong> 33-character password that's easy to remember but nearly impossible to crack!</p>
+
+                <h3>🔄 Enable Advanced Features:</h3>
+                <div class="checklist">
+                    <ul>
+                        <li><strong>Login Alerts:</strong> Get notified of any new device logins</li>
+                        <li><strong>App-Specific Passwords:</strong> Use unique passwords for third-party apps</li>
+                        <li><strong>Trusted Devices:</strong> Mark your personal devices as trusted</li>
+                        <li><strong>Security Keys:</strong> Use hardware keys (YubiKey) for maximum protection</li>
+                        <li><strong>Backup Codes:</strong> Store emergency access codes safely</li>
+                    </ul>
+                </div>
+
+                <h3>⚡ Quick Response to Compromise:</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>Immediate (0-5 minutes)</h4>
+                        <p>Change password immediately, enable 2FA, log out all devices</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Short-term (5-30 minutes)</h4>
+                        <p>Review recent activity, remove suspicious apps, update recovery info</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Follow-up (1-7 days)</h4>
+                        <p>Monitor for unusual activity, inform contacts if needed, strengthen other accounts</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section warning">
+                <h2>🎯 Real-World Attack Examples</h2>
+                <p><strong>Case Study 1:</strong> In 2023, a celebrity's Instagram was hacked using a simple dictionary attack because they used "password123". The attacker posted inappropriate content and demanded ransom.</p>
+                <p><strong>Case Study 2:</strong> A business owner's LinkedIn was compromised through credential stuffing (reused password from a breached site). The attacker used the professional network to scam connections out of $50,000.</p>
+                <p><strong>Case Study 3:</strong> A student's Facebook was hacked during finals week. The attacker changed the recovery email and held the account hostage, demanding cryptocurrency payment.</p>
+            </div>
+
+            <div class="section tip">
+                <h2>🔧 Recommended Security Tools</h2>
+                <div class="social-platforms">
+                    <div class="platform-card">
+                        <h4>🔑 Password Managers</h4>
+                        <ul>
+                            <li>Bitwarden (Free/Premium)</li>
+                            <li>1Password</li>
+                            <li>LastPass</li>
+                            <li>Dashlane</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <h4>🔐 2FA Apps</h4>
+                        <ul>
+                            <li>Google Authenticator</li>
+                            <li>Authy</li>
+                            <li>Microsoft Authenticator</li>
+                            <li>1Password (built-in)</li>
+                        </ul>
+                    </div>
+                    <div class="platform-card">
+                        <h4>🔍 Security Monitoring</h4>
+                        <ul>
+                            <li>HaveIBeenPwned.com</li>
+                            <li>Google Security Checkup</li>
+                            <li>Facebook Security Center</li>
+                            <li>Browser password managers</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section info">
+                <h2>💡 Remember: Security is a Journey, Not a Destination</h2>
+                <p>Cybersecurity threats evolve constantly. Make security checks part of your monthly routine, just like paying bills or cleaning your house. A few minutes of prevention can save you months of recovery time and thousands in damages.</p>
+                
+                <div class="checklist">
+                    <h3>Monthly Security Routine:</h3>
+                    <ul>
+                        <li>Review and update passwords for critical accounts</li>
+                        <li>Check for data breaches affecting your accounts</li>
+                        <li>Review active sessions and connected apps</li>
+                        <li>Update security software and apps</li>
+                        <li>Verify recovery information is current</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Common passwords for brute force simulation
+        const commonPasswords = [
+            '123456', 'password', '12345678', 'qwerty', '123456789',
+            'abc123', 'password123', '1234567', 'welcome', 'admin',
+            '123123', 'Password', 'p@ssw0rd', 'letmein', 'monkey',
+            'dragon', 'sunshine', 'master', 'shadow', 'admin123'
+        ];
+
+        let attackInterval;
+        let currentAttempt = 0;
+        let isAttacking = false;
+        let foundPassword = false;
+
+        function normalLogin() {
+            const password = document.getElementById('password').value;
+            const statusDiv = document.getElementById('loginStatus');
+            const educationBtn = document.getElementById('educationBtn');
+            
+            if (password === 'password123') {
+                statusDiv.innerHTML = '<div style="color: #2ecc71; font-weight: bold;">✅ Login Successful!</div>';
+                educationBtn.style.display = 'block';
+                document.querySelector('.btn-login').style.display = 'none';
+            } else {
+                statusDiv.innerHTML = '<div style="color: #e74c3c; font-weight: bold;">❌ Invalid credentials</div>';
+                educationBtn.style.display = 'none';
+            }
+        }
+
+        function openEducationPage() {
+            document.getElementById('educationPage').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEducationPage() {
+            document.getElementById('educationPage').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function startBruteForce() {
+            if (isAttacking) return;
+            
+            isAttacking = true;
+            foundPassword = false;
+            currentAttempt = 0;
+            
+            document.getElementById('startAttack').style.display = 'none';
+            document.getElementById('stopAttack').style.display = 'block';
+            
+            const logDiv = document.getElementById('attackLog');
+            logDiv.innerHTML = '<div class="log-entry">🚀 Starting brute force attack...</div>';
+            
+            updateStatus('Attack in progress...');
+            
+            attackInterval = setInterval(() => {
+                if (currentAttempt >= commonPasswords.length || foundPassword) {
+                    stopBruteForce();
+                    return;
+                }
+                
+                const password = commonPasswords[currentAttempt];
+                const success = password === 'password123';
+                
+                // Simulate attack attempt
+                addLogEntry(`Trying password: "${password}"`, success ? 'success' : 'fail');
+                
+                currentAttempt++;
+                updateStats();
+                updateProgress();
+                
+                if (success) {
+                    foundPassword = true;
+                    addLogEntry('🎉 PASSWORD FOUND! Access granted.', 'success');
+                    updateStatus('Attack successful! Password cracked.');
+                    document.getElementById('password').value = password;
+                    setTimeout(() => {
+                        document.getElementById('loginStatus').innerHTML = '<div style="color: #2ecc71; font-weight: bold;">✅ System Compromised!</div>';
+                        document.getElementById('educationBtn').style.display = 'block';
+                        document.querySelector('.btn-login').style.display = 'none';
+                    }, 1000);
+                }
+            }, 800);
+        }
+
+        function stopBruteForce() {
+            if (attackInterval) {
+                clearInterval(attackInterval);
+            }
+            
+            isAttacking = false;
+            document.getElementById('startAttack').style.display = 'block';
+            document.getElementById('stopAttack').style.display = 'none';
+            
+            if (!foundPassword && currentAttempt >= commonPasswords.length) {
+                addLogEntry('❌ Attack completed. Password not found in common list.', 'fail');
+                updateStatus('Attack completed. Try with a larger password list.');
+            } else if (!foundPassword) {
+                addLogEntry('⏹️ Attack stopped by user.', 'fail');
+                updateStatus('Attack stopped.');
+            }
+        }
+
+        function addLogEntry(message, type = '') {
+            const logDiv = document.getElementById('attackLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStats() {
+            document.getElementById('attempts').textContent = currentAttempt;
+            document.getElementById('success').textContent = foundPassword ? 1 : 0;
+        }
+
+        function updateProgress() {
+            const progress = (currentAttempt / commonPasswords.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function updateStatus(message) {
+            document.getElementById('attackStatus').textContent = message;
+        }
+
+        // Add some educational information
+        setTimeout(() => {
+            addLogEntry('ℹ️ This demo shows why strong passwords and rate limiting are crucial.');
+        }, 1000);
+    </script>
+</body>
+</html>
